@@ -15,6 +15,7 @@
     "@cloudflare/vitest-pool-workers": "^0.8.66",
     "@nullshot/cli": "0.2.2",
     "@nullshot/test-utils": "^0.3.1",
+    "@types/node": "^25.5.0",
     "@vitest/runner": "^3.2.0",
     "@vitest/snapshot": "^3.2.0",
     "concurrently": "^9.1.2",
