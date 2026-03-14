@@ -1,77 +1,116 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+
 import { fetchRepoFiles } from "./github";
 import { detectSecrets } from "./scanner";
 import { analyzeCode } from "./ai";
 
-export const tools = [
+export function setupServerTools(server: McpServer) {
 
-{
-name: "scan_repo",
-description: "Scan GitHub repository",
+  server.tool(
+    "test_scanner",
+    "Test the secret scanner with a sample API key",
+    {},
+    async () => {
 
-schema: {
-repo: z.string()
-},
+      const result = detectSecrets(`
+        const API_KEY = "sk_live_123456";
+      `);
 
-execute: async ({ repo }: { repo: string }) => {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result)
+          }
+        ]
+      };
 
-const files = await fetchRepoFiles(repo);
+    }
+  );
 
-return {
-content: [{
-type: "text",
-text: `Fetched ${files.length} files from ${repo}`
-}]
-};
+
+
+  // -------------------------------
+  // Scan GitHub Repo
+  // -------------------------------
+
+  server.tool(
+    "scan_repo",
+    "Scan a GitHub repository and return file list",
+    {
+      repo: z.string()
+    },
+    async ({ repo }) => {
+
+      const files = await fetchRepoFiles(repo);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Fetched ${files.length} files from ${repo}`
+          }
+        ]
+      };
+
+    }
+  );
+
+
+
+  // -------------------------------
+  // Secret Detection
+  // -------------------------------
+
+  server.tool(
+    "detect_secrets",
+    "Detect secrets in provided code",
+    {
+      code: z.string()
+    },
+    async ({ code }) => {
+
+      const secrets = detectSecrets(code);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Secrets detected: ${JSON.stringify(secrets)}`
+          }
+        ]
+      };
+
+    }
+  );
+
+
+
+  // -------------------------------
+  // AI Vulnerability Analysis
+  // -------------------------------
+
+  server.tool(
+    "ai_security_analysis",
+    "Analyze code for vulnerabilities using AI",
+    {
+      code: z.string()
+    },
+    async ({ code }) => {
+
+      const result = await analyzeCode(code);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: result ?? "No vulnerabilities detected"
+          }
+        ]
+      };
+
+    }
+  );
 
 }
-
-},
-
-{
-name: "detect_secrets",
-description: "Detect API keys in code",
-
-schema: {
-code: z.string()
-},
-
-execute: async ({ code }: { code: string }) => {
-
-const secrets = detectSecrets(code);
-
-return {
-content: [{
-type: "text",
-text: `Secrets found: ${JSON.stringify(secrets)}`
-}]
-};
-
-}
-
-},
-
-{
-name: "ai_security_analysis",
-description: "AI vulnerability analysis",
-
-schema: {
-code: z.string()
-},
-
-execute: async ({ code }: { code: string }) => {
-
-const result = await analyzeCode(code);
-
-return {
-content: [{
-type: "text",
-text: result
-}]
-};
-
-}
-
-}
-
-];

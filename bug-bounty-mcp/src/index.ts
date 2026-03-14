@@ -1,10 +1,6 @@
 import { ExampleMcpServer } from './server';
-import { tools } from "./tools";
-
-// Export the TodoMcpServer class for Durable Object binding
 export { ExampleMcpServer };
 
-// Worker entrypoint for handling incoming requests
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
