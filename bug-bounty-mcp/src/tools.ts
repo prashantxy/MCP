@@ -1,26 +1,31 @@
 import { z } from "zod";
 
-server.tool(
-  "scan_repo",
-  "Scan GitHub repository for vulnerabilities",
+export const tools = [
   {
-    repo: z.string().describe("GitHub repository URL")
-  },
-  async ({ repo }) => {
+    name: "scan_repo",
+    description: "Scan GitHub repository for vulnerabilities",
+    schema: {
+      repo: z.string()
+    },
 
-    const result = `Scanning ${repo}...
-    
-Potential issues:
-- Hardcoded API key
-- Insecure dependency`;
+    execute: async ({ repo }: { repo: string }) => {
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: result
-        }
-      ]
-    };
+      const result = `
+Scanning ${repo}
+
+Potential Issues:
+- Hardcoded API keys
+- Vulnerable dependencies
+`;
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: result
+          }
+        ]
+      };
+    }
   }
-);
+];
