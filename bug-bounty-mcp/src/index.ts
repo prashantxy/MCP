@@ -1,4 +1,6 @@
 import { ExampleMcpServer } from './server';
+import { tools } from "./tools";
+
 // Export the TodoMcpServer class for Durable Object binding
 export { ExampleMcpServer };
 
